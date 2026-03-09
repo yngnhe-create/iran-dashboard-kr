@@ -2,714 +2,173 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OPENINTEL | 이란 분쟁 대시보드 (Korea)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenIntel | 이란 분쟁 대시보드 (Korea)</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        :root {
-            --bg-dark: #0a0e1a;
-            --bg-card: #151b2d;
-            --bg-header: #1a1f2e;
-            --border: #2d3748;
-            --text-primary: #e0e6ed;
-            --text-secondary: #8b9dc3;
-            --accent-red: #ff4757;
-            --accent-orange: #ff6b6b;
-            --accent-green: #4ecdc4;
-            --accent-yellow: #f9ca24;
-        }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            line-height: 1.5;
+            background: #0a0e1a;
+            color: #e0e6ed;
+            line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%);
+            padding: 20px 30px;
+            border-bottom: 2px solid #ff6b6b;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header h1 { font-size: 24px; color: #fff; }
+        .live-indicator {
+            color: #ff6b6b;
             font-size: 14px;
-            overflow-x: hidden;
+            margin-top: 8px;
         }
-        
-        /* 상단 상태바 */
-        .status-bar {
-            background: var(--bg-header);
-            padding: 8px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-            border-bottom: 1px solid var(--border);
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
         }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 700;
-            font-size: 14px;
+        .alert-box {
+            background: linear-gradient(135deg, #ff4757 0%, #c44569 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
         }
-        
-        .logo::before {
-            content: "⬤";
-            color: var(--accent-red);
-            animation: pulse 2s infinite;
+        .panel {
+            background: #151b2d;
+            border-radius: 12px;
+            border: 1px solid #2d3748;
+            margin-bottom: 20px;
         }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-        
-        .countdown {
-            color: var(--accent-orange);
+        .panel-header {
+            background: #1e2538;
+            padding: 15px 20px;
+            border-bottom: 1px solid #2d3748;
             font-weight: 600;
         }
-        
-        /* 이동 배너 */
-        .ticker-banner {
-            background: linear-gradient(90deg, var(--accent-red), #c44569);
-            padding: 10px 0;
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
-        }
-        
-        .ticker-content {
-            display: inline-block;
-            animation: scroll 25s linear infinite;
-            padding-left: 100%;
-        }
-        
-        .ticker-item {
-            display: inline-block;
-            padding: 0 30px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        
-        @keyframes scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
-        }
-        
-        /* 알림 배너 */
-        .alert-banner {
-            background: linear-gradient(135deg, var(--accent-red) 0%, #c44569 100%);
-            padding: 12px 15px;
-            font-size: 12px;
-        }
-        
-        .alert-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-        }
-        
-        .alert-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: 700;
-        }
-        
-        .alert-severity {
-            background: #fff;
-            color: var(--accent-red);
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-weight: 800;
-            font-size: 9px;
-        }
-        
-        .alert-text {
-            opacity: 0.95;
-            line-height: 1.4;
-        }
-        
-        /* 핵심 지표 그리드 */
+        .panel-content { padding: 20px; }
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1px;
-            background: var(--border);
+            gap: 15px;
+            margin-bottom: 20px;
         }
-        
         .metric-card {
-            background: var(--bg-card);
-            padding: 12px 8px;
-            text-align: center;
-        }
-        
-        .metric-card.critical {
-            background: linear-gradient(135deg, var(--accent-red), #c44569);
-        }
-        
-        .metric-value {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-        
-        .metric-label {
-            font-size: 10px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .metric-sub {
-            font-size: 11px;
-            margin-top: 3px;
-            opacity: 0.8;
-        }
-        
-        /* 진행바 */
-        .escalation-bar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 15px;
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .escalation-icon {
-            font-size: 16px;
-        }
-        
-        .escalation-label {
-            font-size: 12px;
-            font-weight: 600;
-            min-width: 70px;
-        }
-        
-        .progress-container {
-            flex: 1;
-            height: 10px;
-            background: #2d3748;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-red), var(--accent-orange));
-            border-radius: 5px;
-            transition: width 0.3s;
-        }
-        
-        .escalation-value {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--accent-red);
-            min-width: 35px;
-            text-align: right;
-        }
-        
-        /* 수평 스크롤 카드 */
-        .horizontal-scroll {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 15px;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .horizontal-scroll::-webkit-scrollbar {
-            display: none;
-        }
-        
-        .casualty-card {
-            min-width: 130px;
-            background: var(--bg-header);
+            background: #1e2538;
             border-radius: 10px;
-            padding: 12px;
-            scroll-snap-align: start;
-            border: 1px solid var(--border);
-        }
-        
-        .casualty-header {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 8px;
-        }
-        
-        .flag {
-            font-size: 20px;
-        }
-        
-        .country-name {
-            font-size: 11px;
-            color: var(--text-secondary);
-        }
-        
-        .sparkline {
-            height: 25px;
-            margin: 8px 0;
-        }
-        
-        .casualty-numbers {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-        }
-        
-        .casualty-main {
-            font-size: 20px;
-            font-weight: 700;
-        }
-        
-        .casualty-change {
-            font-size: 12px;
-            color: var(--accent-red);
-            font-weight: 600;
-        }
-        
-        /* 섹션 */
-        .section {
-            background: var(--bg-card);
-            margin-bottom: 10px;
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .section-header {
-            padding: 12px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-        
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 15px;
-            font-weight: 600;
-        }
-        
-        .section-toggle {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        
-        .section-content {
-            padding: 0 15px 15px;
-        }
-        
-        /* 필터 탭 */
-        .filter-tabs {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-tab {
-            background: var(--bg-header);
-            border: 1px solid var(--border);
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-        }
-        
-        .filter-tab.active {
-            background: var(--accent-red);
-            border-color: var(--accent-red);
-        }
-        
-        /* 트렌드 리스트 */
-        .trend-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .trend-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: var(--bg-header);
-            border-radius: 8px;
-        }
-        
-        .trend-info {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .trend-flag {
-            font-size: 18px;
-        }
-        
-        .trend-name {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        
-        .trend-chart {
-            width: 60px;
-            height: 20px;
-        }
-        
-        .trend-numbers {
-            text-align: right;
-        }
-        
-        .trend-value {
-            font-size: 16px;
-            font-weight: 700;
-        }
-        
-        .trend-change {
-            font-size: 11px;
-            color: var(--accent-red);
-        }
-        
-        /* 이벤트 맵 */
-        .map-container {
-            background: #1a1f2e;
-            height: 200px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            margin-bottom: 10px;
-        }
-        
-        .map-placeholder {
+            padding: 18px;
             text-align: center;
-            color: var(--text-secondary);
+            border: 1px solid #2d3748;
         }
-        
-        .map-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ff6b6b;
         }
-        
-        /* 업데이트 아이템 */
-        .update-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .update-item {
-            background: var(--bg-header);
-            border-radius: 8px;
-            padding: 12px;
-            border-left: 3px solid var(--accent-red);
-        }
-        
-        .update-time {
-            font-size: 11px;
-            color: var(--accent-orange);
-            margin-bottom: 5px;
-        }
-        
-        .update-title {
+        .metric-label {
             font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 5px;
+            color: #8b9dc3;
+            margin-top: 5px;
         }
-        
-        .update-desc {
-            font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.4;
+        .event-item {
+            background: #1e2538;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 3px solid #ff6b6b;
         }
-        
-        /* 하단 정보 */
-        .footer-info {
+        .event-time { font-size: 12px; color: #8b9dc3; }
+        .event-title { font-weight: 600; margin: 5px 0; }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 900px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .metrics-grid { grid-template-columns: 1fr; }
+        }
+        .refresh-info {
             text-align: center;
-            padding: 20px;
-            color: var(--text-secondary);
-            font-size: 11px;
+            color: #8b9dc3;
+            font-size: 12px;
+            margin-top: 30px;
+            padding: 15px;
+            background: #151b2d;
+            border-radius: 8px;
         }
-        
-        /* 색상 클래스 */
-        .up { color: var(--accent-red); }
-        .down { color: var(--accent-green); }
-        .neutral { color: var(--accent-yellow); }
     </style>
 </head>
 <body>
-    <!-- 상단 상태바 -->
-    <div class="status-bar">
-        <div class="logo">OPENINTEL IRAN</div>
-        <div class="countdown">Next: <span id="countdown">60</span>s</div>
+    <div class="header">
+        <h1>🎯 OpenIntel | 이란 분쟁 대시보드</h1>
+        <div class="live-indicator">● 실시간 업데이트 중 | 마지막 업데이트: 2026-03-10 00:00</div>
     </div>
 
-    <!-- 이동 배너 -->
-    <div class="ticker-banner">
-        <div class="ticker-content">
-            <span class="ticker-item">🔴 오일 $117 돌파 - CNBC "40년 만에 최대 단일 상승"</span>
-            <span class="ticker-item">⚡ KOSPI 서킷브레이커 발동 -8.1%</span>
-            <span class="ticker-item">🚨 카타르, 이란 전투기 격추</span>
-            <span class="ticker-item">💥 미국, 이란 해군 기지 공습</span>
-            <span class="ticker-item">⚓ 호륨무즈 해협 사실상 쇄</span>
+    <div class="container">
+        <!-- 경고 알림 -->
+        <div class="alert-box">
+            <h3>🚨 긴급 상황 알림</h3>
+            <p>미국-이란 전쟁 발발 | KOSPI -8.11% | 유가 $110+ 급등 | 아시아 증시 동반 하락</p>
         </div>
-    </div>
 
-    <!-- 알림 배너 -->
-    <div class="alert-banner">
-        <div class="alert-header">
-            <span class="alert-badge">SIGNIFICANT</span>
-            <span class="alert-severity">⚡ 10/10</span>
+        <!-- 핵심 지표 -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value">-8.11%</div>
+                <div class="metric-label">KOSPI 하락률</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">$110+</div>
+                <div class="metric-label">브렌트유 (배럴)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">20</div>
+                <div class="metric-label">참전/관련 국가</div>
+            </div>
         </div>
-        <div class="alert-text">
-            Oil eases from $117+ peak to WTI $114.40 — CNBC calls it largest single-day oil gain in nearly 40 years. Updated Mon, Mar 9, 12:40 PM
-        </div>
-    </div>
 
-    <!-- 핵심 지표 -->
-    <div class="metrics-grid">
-        <div class="metric-card critical">
-            <div class="metric-value">10/10</div>
-            <div class="metric-label">ESCALATION</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value">1,673-4,602</div>
-            <div class="metric-label">TOTAL KILLED</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value">$110.43</div>
-            <div class="metric-label">BRENT CRUDE</div>
-            <div class="metric-sub down">▼ $NaN</div>
-        </div>
-    </div>
-
-    <!-- 진행바 -->
-    <div class="escalation-bar">
-        <span class="escalation-icon">⚡</span>
-        <span class="escalation-label">Escalation</span>
-        <div class="progress-container">
-            <div class="progress-fill" style="width: 100%"></div>
-        </div>
-        <span class="escalation-value">10/10</span>
-    </div>
-
-    <!-- 사상자 수평 스크롤 -->
-    <div class="horizontal-scroll">
-        <div class="casualty-card">
-            <div class="casualty-header">
-                <span class="flag">🇮🇷</span>
-                <span class="country-name">Iran</span>
-            </div>
-            <svg class="sparkline" viewBox="0 0 100 25">
-                <polyline points="0,20 25,15 50,10 75,5 100,2" fill="none" stroke="#ff4757" stroke-width="2"/>
-            </svg>
-            <div class="casualty-numbers">
-                <span class="casualty-main">1,336</span>
-                <span class="casualty-change">+594</span>
-            </div>
-        </div>
-        
-        <div class="casualty-card">
-            <div class="casualty-header">
-                <span class="flag">🇺🇸</span>
-                <span class="country-name">US</span>
-            </div>
-            <svg class="sparkline" viewBox="0 0 100 25">
-                <polyline points="0,22 50,20 100,18" fill="none" stroke="#ff4757" stroke-width="2"/>
-            </svg>
-            <div class="casualty-numbers">
-                <span class="casualty-main">8</span>
-                <span class="casualty-change">+1</span>
-            </div>
-        </div>
-        
-        <div class="casualty-card">
-            <div class="casualty-header">
-                <span class="flag">🇮🇱</span>
-                <span class="country-name">Israel</span>
-            </div>
-            <svg class="sparkline" viewBox="0 0 100 25">
-                <polyline points="0,20 50,18 100,15" fill="none" stroke="#ff4757" stroke-width="2"/>
-            </svg>
-            <div class="casualty-numbers">
-                <span class="casualty-main">13</span>
-                <span class="casualty-change">+1</span>
-            </div>
-        </div>
-        
-        <div class="casualty-card">
-            <div class="casualty-header">
-                <span class="flag">🇱🇧</span>
-                <span class="country-name">Lebanon</span>
-            </div>
-            <svg class="sparkline" viewBox="0 0 100 25">
-                <polyline points="0,15 25,12 50,10 75,8 100,5" fill="none" stroke="#ff4757" stroke-width="2"/>
-            </svg>
-            <div class="casualty-numbers">
-                <span class="casualty-main">394</span>
-                <span class="casualty-change">+48</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- 트렌드 차트 섹션 -->
-    <div class="section">
-        <div class="section-header" onclick="toggleSection(this)">
-            <div class="section-title">
-                <span>📈</span>
-                <span>TREND CHARTS</span>
-            </div>
-            <span class="section-toggle">▼</span>
-        </div>
-        <div class="section-content">
-            <div class="trend-list">
-                <div class="trend-item">
-                    <div class="trend-info">
-                        <span class="trend-flag">🇮🇷</span>
-                        <span class="trend-name">Iran deaths</span>
+        <div class="dashboard-grid">
+            <!-- 최신 이벤트 -->
+            <div class="panel">
+                <div class="panel-header">📡 최신 이벤트 타임라인</div>
+                <div class="panel-content">
+                    <div class="event-item">
+                        <div class="event-time">2026-03-10 00:00 KST</div>
+                        <div class="event-title">KOSPI -8.11% 폭락, 서킷브레이커 발동</div>
+                        <div>이란 전쟁 여파로 2008년 이후 최대 하락률 기록</div>
                     </div>
-                    <svg class="trend-chart" viewBox="0 0 60 20">
-                        <polyline points="0,18 15,15 30,10 45,5 60,2" fill="none" stroke="#ff4757" stroke-width="2"/>
-                    </svg>
-                    <div class="trend-numbers">
-                        <div class="trend-value">1,336</div>
-                        <div class="trend-change">+594</div>
+                    <div class="event-item">
+                        <div class="event-time">3월 9일 09:00 KST</div>
+                        <div class="event-title">카타르, 이란 전투기 격추</div>
+                        <div>전쟁 첫 이란 항공기 격추, 카타르 개입 공식화</div>
                     </div>
                 </div>
-                
-                <div class="trend-item">
-                    <div class="trend-info">
-                        <span class="trend-flag">🛢️</span>
-                        <span class="trend-name">Brent oil</span>
+            </div>
+
+            <!-- 참전국 현황 -->
+            <div class="panel">
+                <div class="panel-header">🌍 참전/관련 국가 현황</div>
+                <div class="panel-content">
+                    <div class="event-item">
+                        <div class="event-title">🔴 연합군</div>
+                        <div>미국, 이스라엘, 영국, 프랑스, 독일, 사우디, UAE, 카타르</div>
                     </div>
-                    <svg class="trend-chart" viewBox="0 0 60 20">
-                        <polyline points="0,15 20,12 40,8 60,3" fill="none" stroke="#ff4757" stroke-width="2"/>
-                    </svg>
-                    <div class="trend-numbers">
-                        <div class="trend-value">$110.43</div>
-                        <div class="trend-change">+$32.97</div>
-                    </div>
-                </div>
-                
-                <div class="trend-item">
-                    <div class="trend-info">
-                        <span class="trend-flag">🇺🇸</span>
-                        <span class="trend-name">US troops</span>
-                    </div>
-                    <svg class="trend-chart" viewBox="0 0 60 20">
-                        <polyline points="0,18 30,16 60,15" fill="none" stroke="#4ecdc4" stroke-width="2"/>
-                    </svg>
-                    <div class="trend-numbers">
-                        <div class="trend-value">50,000</div>
-                        <div class="trend-change" style="color: #4ecdc4">—</div>
+                    <div class="event-item">
+                        <div class="event-title">🟡 이란 측</div>
+                        <div>이란, 후티 반군, 헤즈볼라, 시아 민병대</div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- 이벤트 맵 섹션 -->
-    <div class="section">
-        <div class="section-header" onclick="toggleSection(this)">
-            <div class="section-title">
-                <span>🗺️</span>
-                <span>EVENT MAP</span>
-            </div>
-            <span class="section-toggle">▼</span>
-        </div>
-        <div class="section-content">
-            <div class="filter-tabs">
-                <div class="filter-tab active">Latest</div>
-                <div class="filter-tab">3h</div>
-                <div class="filter-tab">6h</div>
-                <div class="filter-tab">12h</div>
-                <div class="filter-tab">24h</div>
-                <div class="filter-tab">All</div>
-            </div>
-            
-            <div class="map-container">
-                <div class="map-placeholder">
-                    <div class="map-icon">🗺️</div>
-                    <div>Interactive Map</div>
-                    <div style="font-size: 11px; color: #8b9dc3; margin-top: 5px">11 locations · Last 1h</div>
-                </div>
-            </div>
+        <div class="refresh-info">
+            ⏱️ 마지막 업데이트: 2026-03-10 00:00 | 4시간마다 자동 업데이트<br>
+            📊 데이터 출처: CNBC, Bloomberg, Google Finance, 한국거래소
         </div>
     </div>
-
-    <!-- 최신 업데이트 -->
-    <div class="section">
-        <div class="section-header" onclick="toggleSection(this)">
-            <div class="section-title">
-                <span>📡</span>
-                <span>LATEST UPDATE</span>
-            </div>
-            <span class="section-toggle">▼</span>
-        </div>
-        <div class="section-content">
-            <div class="update-list">
-                <div class="update-item">
-                    <div class="update-time">Mon, Mar 9, 12:40 PM GMT+9 · 43m ago</div>
-                    <div class="update-title">🔴 BREAKING: Oil eases from $117+ peak to WTI $114.40</div>
-                    <div class="update-desc">CNBC calls it largest single-day oil gain in nearly 40 years. Asian markets crash: South Korea's Kospi triggered circuit breaker.</div>
-                </div>
-                
-                <div class="update-item">
-                    <div class="update-time">Mon, Mar 9, 11:42 AM GMT+9 · 1h ago</div>
-                    <div class="update-title">⚔️ Military: IDF destroys Tehran bunker</div>
-                    <div class="update-desc">Trump vowed 'no deal until Iran surrenders.' AP sources confirmed Russia providing Iran intelligence to target US military.</div>
-                </div>
-                
-                <div class="update-item">
-                    <div class="update-time">Mon, Mar 9, 9:40 AM GMT+9 · 3h ago</div>
-                    <div class="update-title">🌍 Diplomatic: Qatar PM says Iran 'betrayed us'</div>
-                    <div class="update-desc">Mojtaba Khamenei formally named Iran's new Supreme Leader. Qatar calls for de-escalation as Iran's miscalculation 'destroyed everything.'</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 하단 정보 -->
-    <div class="footer-info">
-        👁️ 3,473 views · 📡 127 updates · Auto-refreshes every 60 seconds<br>
-        📊 Data: CNBC, Bloomberg, Google Finance, KRX · Updated: <span id="updateTime"></span>
-    </div>
-
-    <script>
-        // 카운트다운
-        let countdown = 60;
-        setInterval(() => {
-            countdown--;
-            if (countdown <= 0) {
-                countdown = 60;
-                location.reload();
-            }
-            document.getElementById('countdown').textContent = countdown;
-        }, 1000);
-        
-        // 섹션 토글
-        function toggleSection(header) {
-            const content = header.nextElementSibling;
-            const toggle = header.querySelector('.section-toggle');
-            
-            if (content.style.display === 'none') {
-                content.style.display = 'block';
-                toggle.textContent = '▼';
-            } else {
-                content.style.display = 'none';
-                toggle.textContent = '▶';
-            }
-        }
-        
-        // 업데이트 시간
-        document.getElementById('updateTime').textContent = new Date().toLocaleString('ko-KR');
-    </script>
 </body>
 </html>
